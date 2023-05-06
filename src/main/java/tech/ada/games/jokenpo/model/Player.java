@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EqualsAndHashCode
 @ToString
 public class Player implements Serializable {
