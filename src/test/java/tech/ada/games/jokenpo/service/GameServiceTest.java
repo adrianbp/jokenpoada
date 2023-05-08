@@ -1,7 +1,7 @@
 package tech.ada.games.jokenpo.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -16,9 +16,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import tech.ada.games.jokenpo.dto.GameDto;
+import tech.ada.games.jokenpo.dto.GameMoveDto;
+import tech.ada.games.jokenpo.dto.ResultDto;
 import tech.ada.games.jokenpo.exception.BadRequestException;
+import tech.ada.games.jokenpo.exception.DataConflictException;
 import tech.ada.games.jokenpo.exception.DataNotFoundException;
+import tech.ada.games.jokenpo.model.Game;
+import tech.ada.games.jokenpo.model.Move;
 import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.model.PlayerMove;
 import tech.ada.games.jokenpo.repository.GameRepository;
 import tech.ada.games.jokenpo.repository.MoveRepository;
 import tech.ada.games.jokenpo.repository.PlayerMoveRepository;
@@ -56,12 +62,10 @@ public class GameServiceTest {
 	}
 	
 	@Test
-	void newGameLessPlayers() {
-		
+	void newGame() {
 		
 		GameDto game = new GameDto();
 		game.setPlayers(new ArrayList<>());
-		//when(SecurityUtils.getCurrentUserLogin()).thenReturn(player.getUsername());
 		String username = null;
 		
 		//Testando login não encontrado
@@ -72,7 +76,6 @@ public class GameServiceTest {
 
 	    //testando login encontrado, mas sem jogadores no jogo
 		when(playerRepository.findByUsername(username)).thenReturn(opPlayer1);
-		
 		exception = assertThrows(BadRequestException.class, () -> gameService.newGame(game));
 		expectedMessage = "O jogo possui menos que dois jogadores!";
 	    actualMessage = exception.getMessage();
@@ -80,7 +83,6 @@ public class GameServiceTest {
 
 	    //testando com somente um jogador no jogo
 	    game.getPlayers().add(1L);
-		
 		exception = assertThrows(BadRequestException.class, () -> gameService.newGame(game));
 		expectedMessage = "O jogo possui menos que dois jogadores!";
 	    actualMessage = exception.getMessage();
@@ -100,7 +102,86 @@ public class GameServiceTest {
 		when(playerRepository.findById(player2.getId())).thenReturn(opPlayer2);
 		
 		assertDoesNotThrow(() -> gameService.newGame(game));
+	}
+	
+	@Test
+	void insertPlayerMoveTest() {
+		GameMoveDto gameMove = new GameMoveDto();
+		gameMove.setGameId(1L);
 		
+		Game game = new Game();
+		game.setId(1L);
+		game.setFinished(true);
+		Optional<Game> opGame = Optional.of(game);
+		
+		String username = null;
+		
+		//Testando login não encontrado
+	    Exception exception = assertThrows(DataNotFoundException.class, () -> gameService.insertPlayerMove(gameMove));
+	    String expectedMessage = "O jogador não está cadastrado!";
+	    String actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
 	    
+	    //testando login encontrado, mas jogo não cadastrado
+		when(playerRepository.findByUsername(username)).thenReturn(opPlayer1);
+		exception = assertThrows(DataNotFoundException.class, () -> gameService.insertPlayerMove(gameMove));
+		expectedMessage = "Jogo não cadastrado!";
+	    actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
+
+
+		//Testando com jogo finalizado
+	    when(gameRepository.findById(gameMove.getGameId())).thenReturn(opGame);
+		exception = assertThrows(BadRequestException.class, () -> gameService.insertPlayerMove(gameMove));
+		expectedMessage = "O jogo já foi finalizado!";
+	    actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
+	    
+	    //Testando com jogo aberto
+	    game.setFinished(false);
+	    
+	    //testando com jogada não cadastrada
+		exception = assertThrows(DataNotFoundException.class, () -> gameService.insertPlayerMove(gameMove));
+		expectedMessage = "Jogada não cadastrada";
+	    actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
+	    
+	    //Testando com jogada cadastrada
+	    gameMove.setMoveId(1L);
+	    Move move = new Move();
+	    move.setId(1L);
+	    move.setMove("SPOCK");
+	    Optional<Move> opMove = Optional.of(move);
+	    when(moveRepository.findById(gameMove.getMoveId())).thenReturn(opMove);
+		exception = assertThrows(DataNotFoundException.class, () -> gameService.insertPlayerMove(gameMove));
+		expectedMessage = "Jogador não está cadastrado no jogo!";
+	    actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
+	    
+	    //Testando jogador já fez jogada
+	    PlayerMove playerMove = new PlayerMove();
+	    playerMove.setId(1L);
+	    playerMove.setGame(game);
+	    playerMove.setMove(move);
+	    playerMove.setPlayer(player1);
+	    Optional<PlayerMove> opPlayerMove = Optional.of(playerMove);
+	    when(playerMoveRepository.findByUnfinishedGameIdAndPlayer(player1.getId(), gameMove.getGameId())).thenReturn(opPlayerMove);
+	    
+	    exception = assertThrows(DataConflictException.class, () -> gameService.insertPlayerMove(gameMove));
+		expectedMessage = "Jogador já realizou a sua jogada!";
+	    actualMessage = exception.getMessage();
+	    assertTrue(actualMessage.contains(expectedMessage));
+	    
+	    //Testando com jogador não fez a jogada
+	    playerMove.setMove(null);
+	    
+	    ResultDto resultado = null;
+	    try {
+	    	resultado = gameService.insertPlayerMove(gameMove);
+	    }
+	    catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+	    System.out.println(resultado);
 	}
 }
