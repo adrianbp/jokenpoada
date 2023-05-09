@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,6 +31,7 @@ public class Player implements Serializable {
     @Column(nullable = false)
     private String name;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "players_roles",
             joinColumns = @JoinColumn(name = "player_id", referencedColumnName = "id"),

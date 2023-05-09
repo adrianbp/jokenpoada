@@ -79,7 +79,7 @@ public class GameService {
         playerMove.setMove(move);
         playerMoveRepository.save(playerMove);
         Long countMovesPlayed = playerMoveRepository.countMovesPlayedByUnfinishedGame(currentGame.getId());
-        Long countMovesTotal = playerMoveRepository.countMovesPlayedByUnfinishedGame(currentGame.getId());
+        Long countMovesTotal = playerMoveRepository.countByUnfinishedGameId(currentGame.getId());
         if (Objects.equals(countMovesPlayed, countMovesTotal)) {
             log.info("Todos os jogadores já realizaram suas jogadas! Gerando o resultado final!");
             boolean isSpock = playerMoveRepository.existsSpockByUnfinishedGameId(currentGame.getId());
