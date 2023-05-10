@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import tech.ada.games.jokenpo.dto.GameDto;
 import tech.ada.games.jokenpo.dto.GameMoveDto;
@@ -31,7 +33,8 @@ import tech.ada.games.jokenpo.repository.PlayerMoveRepository;
 import tech.ada.games.jokenpo.repository.PlayerRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class GameServiceTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class GameServiceExceptionsTest {
 
 	@InjectMocks
 	GameService gameService;
@@ -52,6 +55,12 @@ public class GameServiceTest {
 	Optional<Player> opPlayer1;
 	Player player2;
 	Optional<Player> opPlayer2;
+	GameMoveDto gameMove;
+	Game game;
+	Optional<Game> opGame;
+	Optional<Move> opMove;
+	
+	String username = null;
 	
 	@BeforeEach
 	void createUser() {
@@ -59,6 +68,20 @@ public class GameServiceTest {
 		opPlayer1 = Optional.of(player1);
 		player2 = new Player(2L, "user2", "pass", "user2", null);
 		opPlayer2 = Optional.of(player2);
+		gameMove = new GameMoveDto();
+		gameMove.setGameId(1L);
+		
+		game = new Game();
+		game.setId(1L);
+		game.setFinished(false);
+		opGame = Optional.of(game);
+		
+
+	    gameMove.setMoveId(1L);
+	    Move move0 = new Move();
+	    move0.setId(1L);
+	    move0.setMove("Spock");
+	    opMove = Optional.of(move0);
 	}
 	
 	@Test
@@ -66,7 +89,6 @@ public class GameServiceTest {
 		
 		GameDto game = new GameDto();
 		game.setPlayers(new ArrayList<>());
-		String username = null;
 		
 		//Testando login não encontrado
 	    Exception exception = assertThrows(DataNotFoundException.class, () -> gameService.newGame(game));
@@ -105,16 +127,12 @@ public class GameServiceTest {
 	}
 	
 	@Test
-	void insertPlayerMoveTest() {
+	void insertPlayerMoveExceptionsTest() {
 		GameMoveDto gameMove = new GameMoveDto();
 		gameMove.setGameId(1L);
-		
-		Game game = new Game();
-		game.setId(1L);
+
 		game.setFinished(true);
-		Optional<Game> opGame = Optional.of(game);
-		
-		String username = null;
+
 		
 		//Testando login não encontrado
 	    Exception exception = assertThrows(DataNotFoundException.class, () -> gameService.insertPlayerMove(gameMove));
@@ -181,6 +199,7 @@ public class GameServiceTest {
 	    }
 	    catch (Exception e) {
 	    	e.printStackTrace();
+	    	throw new RuntimeException(e);
 	    }
 	    System.out.println(resultado);
 	}

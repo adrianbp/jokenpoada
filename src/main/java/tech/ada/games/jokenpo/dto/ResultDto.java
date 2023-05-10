@@ -16,5 +16,6 @@ public class ResultDto {
     public List<Long> winners;
     public Long moveId;
     public String message;
+    public String originalResult;
 
 }

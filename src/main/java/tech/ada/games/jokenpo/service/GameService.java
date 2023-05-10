@@ -149,10 +149,12 @@ public class GameService {
             dto.setWinners(playerIds);
             dto.setMoveId(moveId);
             dto.setMessage(msg);
+            dto.setOriginalResult(result);
             return dto;
         }
         ResultDto dto = new ResultDto();
         dto.setMessage(result);
+        dto.setOriginalResult(result);
         return dto;
     }
 
