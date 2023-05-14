@@ -23,8 +23,10 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginDto loginDto) {
+    	log.info("Autenticando: {}", loginDto);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsername(), loginDto.getPassword()));
+        log.info("Autentication: {}", authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
         log.info("Jogador autenticado com sucesso!");

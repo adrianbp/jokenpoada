@@ -67,15 +67,20 @@ public class GameService {
         Player currentPlayer = verifyCurrentPlayer();
         Game currentGame = gameRepository.findById(gameMove.getGameId()).orElseThrow(() ->
                 new DataNotFoundException("Jogo não cadastrado!"));
+        
         if (currentGame.getFinished())
             throw new BadRequestException("O jogo já foi finalizado!");
+        
         Move move = moveRepository.findById(gameMove.getMoveId()).orElseThrow(() ->
                 new DataNotFoundException("Jogada não cadastrada"));
+        
         PlayerMove playerMove = playerMoveRepository.findByUnfinishedGameIdAndPlayer(currentPlayer.getId(),
                 gameMove.getGameId()).orElseThrow(() ->
                 new DataNotFoundException("Jogador não está cadastrado no jogo!"));
+        
         if (playerMove.getMove() != null)
             throw new DataConflictException("Jogador já realizou a sua jogada!");
+        
         playerMove.setMove(move);
         playerMoveRepository.save(playerMove);
         Long countMovesPlayed = playerMoveRepository.countMovesPlayedByUnfinishedGame(currentGame.getId());

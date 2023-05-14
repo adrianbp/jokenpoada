@@ -64,7 +64,7 @@ public class PlayerControllerTest extends BaseControllerTest {
 
     @Test
     public void testFindPlayers() throws Exception {
-;
+
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/jokenpo/player")
                         .contentType(MediaType.APPLICATION_JSON)
