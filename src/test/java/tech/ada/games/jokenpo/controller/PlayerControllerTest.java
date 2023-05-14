@@ -1,43 +1,33 @@
 package tech.ada.games.jokenpo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import tech.ada.games.jokenpo.dto.LoginDto;
 import tech.ada.games.jokenpo.dto.PlayerDto;
 import tech.ada.games.jokenpo.model.Player;
 import tech.ada.games.jokenpo.model.Role;
-import tech.ada.games.jokenpo.response.AuthResponse;
-import tech.ada.games.jokenpo.service.AuthService;
-import tech.ada.games.jokenpo.service.PlayerService;
+import tech.ada.games.jokenpo.repository.RoleRepository;
 
-import java.util.Arrays;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PlayerControllerTest extends BaseControllerTest {
 
+    @Autowired
+    private RoleRepository roleRepository;
 
 
     @BeforeEach
@@ -45,7 +35,8 @@ public class PlayerControllerTest extends BaseControllerTest {
         this.createUserIfNotExists();
         this.login();
     }
-    
+
+
 
     @Test
     public void testCreatePlayer() throws Exception {
@@ -91,9 +82,21 @@ public class PlayerControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Transactional
     public void testDeletePlayer() throws Exception {
-    	Long userId = playerRepository.findByUsername(username).get().getId();
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/jokenpo/player/{player}", userId)
+
+        Player player = new Player();
+        player.setUsername("usuario");
+        player.setName("Joao");
+        player.setPassword("BLALOC");
+
+        Set<Role> roles = new HashSet<>();
+        Role role = roleRepository.findByName("ROLE_USER").get();
+        roles.add(role);
+        player.setRoles(roles);
+        Player p = playerRepository.save(player);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/jokenpo/player/{player}", p.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", this.getAuthorization())
                 )
