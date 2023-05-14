@@ -45,7 +45,7 @@ public class PlayerControllerTest extends BaseControllerTest {
         this.createUserIfNotExists();
         this.login();
     }
-
+    
 
     @Test
     public void testCreatePlayer() throws Exception {
@@ -92,7 +92,8 @@ public class PlayerControllerTest extends BaseControllerTest {
 
     @Test
     public void testDeletePlayer() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/jokenpo/player/{player}", 1L)
+    	Long userId = playerRepository.findByUsername(username).get().getId();
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/jokenpo/player/{player}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", this.getAuthorization())
                 )
