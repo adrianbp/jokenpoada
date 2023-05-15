@@ -33,6 +33,7 @@ import tech.ada.games.jokenpo.dto.GameDto;
 import tech.ada.games.jokenpo.dto.GameMoveDto;
 import tech.ada.games.jokenpo.dto.PlayerDto;
 import tech.ada.games.jokenpo.dto.ResultDto;
+import tech.ada.games.jokenpo.exception.DataNotFoundException;
 import tech.ada.games.jokenpo.model.Game;
 import tech.ada.games.jokenpo.model.Move;
 import tech.ada.games.jokenpo.model.Player;
@@ -64,6 +65,12 @@ public class GameControllerTest extends BaseControllerTest {
 	
 	Game gameCriado;
 	
+    Move moveSpock;
+    Move moveTesoura;
+    Move movePapel;
+    Move movePedra;
+    Move moveLagarto;
+	
 	@BeforeAll
 	public void setUp() throws JsonProcessingException, Exception {
 		this.createUserIfNotExists();
@@ -92,19 +99,20 @@ public class GameControllerTest extends BaseControllerTest {
         moveRepository.save(new Move(null, "Pedra", null));
         moveRepository.save(new Move(null, "Lagarto", null));
         
+        moveSpock = moveRepository.findByMove("Spock").orElseThrow(() -> new DataNotFoundException("Move Spock not found"));
+        moveTesoura = moveRepository.findByMove("Tesoura").orElseThrow(() -> new DataNotFoundException("Move Tesoura not found"));
+        movePapel = moveRepository.findByMove("Papel").orElseThrow(() -> new DataNotFoundException("Move Papel not found"));
+        movePedra = moveRepository.findByMove("Pedra").orElseThrow(() -> new DataNotFoundException("Move Pedra not found"));
+        moveLagarto = moveRepository.findByMove("Lagarto").orElseThrow(() -> new DataNotFoundException("Move Lagarto not found"));
+        
 	}
 	
 	@AfterAll
 	public void cleanUp() {
-		try {
-			playerMoveRepository.deleteAll();
-			gameRepository.deleteAll();
-			moveRepository.deleteAll();
-			playerRepository.deleteAll();
-		}
-		catch (Exception e) {
-			
-		}
+		playerMoveRepository.deleteAllInBatch();
+		gameRepository.deleteAllInBatch();
+		moveRepository.deleteAllInBatch();
+		playerRepository.deleteAllInBatch();
 	}
 	
 	@Test
@@ -149,7 +157,7 @@ public class GameControllerTest extends BaseControllerTest {
 		
 		String token = this.login(p1.getUsername(), p1.getPassword());
 		
-		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), 1L);
+		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), moveSpock.getId());
 		// Act
 		MvcResult result = mockMvc.perform(post("/api/v1/jokenpo/game/move")
 						.header("Authorization", "Bearer " + token)
@@ -170,7 +178,7 @@ public class GameControllerTest extends BaseControllerTest {
 		
 		String token = this.login(p2.getUsername(), p2.getPassword());
 		
-		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), 2L);
+		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), moveTesoura.getId());
 		// Act
 		MvcResult result = mockMvc.perform(post("/api/v1/jokenpo/game/move")
 						.header("Authorization", "Bearer " + token)

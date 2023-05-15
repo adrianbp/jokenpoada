@@ -11,9 +11,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "game_winner")
+@Table(name = "games_winners")
 public class GameWinner {
 
     @EmbeddedId
     private GameWinnerId id;
+    
+    @MapsId("playerId")
+    @ManyToOne
+    @JoinColumn(name = "player_id", referencedColumnName = "id")
+    private Player player;
 }

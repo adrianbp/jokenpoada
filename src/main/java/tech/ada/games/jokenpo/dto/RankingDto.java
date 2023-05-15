@@ -18,11 +18,15 @@ import lombok.ToString;
 public class RankingDto implements Comparable<RankingDto> {
 
 	private Integer position;
-	private Long playerId;
+	private PlayerDto player;
 	private Long points;
 	
 	@Override
 	public int compareTo(RankingDto o) {
-		return o.getPoints().compareTo(this.points);
+		int comparePoints = o.getPoints().compareTo(this.points);
+		if (comparePoints != 0) {
+			return comparePoints;
+		}
+		return this.getPlayer().getUsername().compareTo(o.getPlayer().getUsername());
 	}
 }
