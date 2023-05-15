@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlayerControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.controller</a> &gt; <span class="el_source">PlayerControllerTest.java</span></div><h1>PlayerControllerTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.controller;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import tech.ada.games.jokenpo.dto.PlayerDto;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.model.Role;
+import tech.ada.games.jokenpo.repository.RoleRepository;
+
+
+import java.util.HashSet;
+import java.util.Set;
+
+
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
+<span class="fc" id="L27">public class PlayerControllerTest extends BaseControllerTest {</span>
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+
+    @BeforeEach
+    public void setUp() throws JsonProcessingException, Exception {
+<span class="fc" id="L35">        this.createUserIfNotExists();</span>
+<span class="fc" id="L36">        this.login();</span>
+<span class="fc" id="L37">    }</span>
+
+
+
+    @Test
+    public void testCreatePlayer() throws Exception {
+
+<span class="fc" id="L44">         String username = &quot;usuario2&quot;;</span>
+<span class="fc" id="L45">         String password = &quot;senha1&quot;;</span>
+<span class="fc" id="L46">         String token = &quot;usuario2&quot;;</span>
+
+<span class="fc" id="L48">        PlayerDto playerDto = new PlayerDto(username, password, token);</span>
+<span class="fc" id="L49">        mockMvc.perform(MockMvcRequestBuilders.post(&quot;/api/v1/jokenpo/player/create&quot;)</span>
+<span class="fc" id="L50">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L51">                        .content(objectMapper.writeValueAsString(playerDto)))</span>
+<span class="fc" id="L52">                .andExpect(MockMvcResultMatchers.status().isCreated());</span>
+<span class="fc" id="L53">    }</span>
+
+
+    @Test
+    public void testFindPlayers() throws Exception {
+
+
+<span class="fc" id="L60">        mockMvc.perform(MockMvcRequestBuilders.get(&quot;/api/v1/jokenpo/player&quot;)</span>
+<span class="fc" id="L61">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L62">                        .header(&quot;Authorization&quot;, this.getAuthorization())</span>
+                )
+
+<span class="fc" id="L65">                .andExpect(MockMvcResultMatchers.status().isOk())</span>
+<span class="fc" id="L66">                .andExpect(MockMvcResultMatchers.jsonPath(&quot;$[0].name&quot;).value(&quot;usuario1&quot;))</span>
+<span class="fc" id="L67">                .andExpect(MockMvcResultMatchers.jsonPath(&quot;$[0].username&quot;).value(&quot;usuario1&quot;));</span>
+
+<span class="fc" id="L69">    }</span>
+
+    @Test
+    public void testFindPlayer() throws Exception {
+
+
+<span class="fc" id="L75">        mockMvc.perform(MockMvcRequestBuilders.get(&quot;/api/v1/jokenpo/player/{player}&quot;, &quot;usuario1&quot;)</span>
+<span class="fc" id="L76">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L77">                        .header(&quot;Authorization&quot;, this.getAuthorization())</span>
+                )
+<span class="fc" id="L79">                .andExpect(MockMvcResultMatchers.status().isOk())</span>
+<span class="fc" id="L80">                .andExpect(MockMvcResultMatchers.jsonPath(&quot;$.name&quot;).value(&quot;usuario1&quot;))</span>
+<span class="fc" id="L81">                .andExpect(MockMvcResultMatchers.jsonPath(&quot;$.username&quot;).value(&quot;usuario1&quot;));</span>
+<span class="fc" id="L82">    }</span>
+
+    @Test
+    @Transactional
+    public void testDeletePlayer() throws Exception {
+
+<span class="fc" id="L88">        Player player = new Player();</span>
+<span class="fc" id="L89">        player.setUsername(&quot;usuario&quot;);</span>
+<span class="fc" id="L90">        player.setName(&quot;Joao&quot;);</span>
+<span class="fc" id="L91">        player.setPassword(&quot;BLALOC&quot;);</span>
+
+<span class="fc" id="L93">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L94">        Role role = roleRepository.findByName(&quot;ROLE_USER&quot;).get();</span>
+<span class="fc" id="L95">        roles.add(role);</span>
+<span class="fc" id="L96">        player.setRoles(roles);</span>
+<span class="fc" id="L97">        Player p = playerRepository.save(player);</span>
+
+<span class="fc" id="L99">        mockMvc.perform(MockMvcRequestBuilders.delete(&quot;/api/v1/jokenpo/player/{player}&quot;, p.getId())</span>
+<span class="fc" id="L100">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L101">                        .header(&quot;Authorization&quot;, this.getAuthorization())</span>
+                )
+<span class="fc" id="L103">                .andExpect(MockMvcResultMatchers.status().isNoContent());</span>
+<span class="fc" id="L104">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

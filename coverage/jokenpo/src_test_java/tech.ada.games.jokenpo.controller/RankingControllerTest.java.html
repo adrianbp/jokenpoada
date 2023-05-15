@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>RankingControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.controller</a> &gt; <span class="el_source">RankingControllerTest.java</span></div><h1>RankingControllerTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.controller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import tech.ada.games.jokenpo.dto.PlayerDto;
+import tech.ada.games.jokenpo.dto.RankingDto;
+import tech.ada.games.jokenpo.exception.DataNotFoundException;
+import tech.ada.games.jokenpo.model.Game;
+import tech.ada.games.jokenpo.model.GameWinner;
+import tech.ada.games.jokenpo.model.GameWinnerId;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.repository.GameRepository;
+import tech.ada.games.jokenpo.repository.GameWinnerRepository;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+<span class="fc" id="L34">public class RankingControllerTest extends BaseControllerTest {</span>
+
+	@Autowired
+	private GameWinnerRepository gameWinnerRepository;
+	
+	@Autowired
+	private GameRepository gameRepository;
+	
+	@BeforeEach
+	public void setUp() throws JsonProcessingException, Exception {
+<span class="fc" id="L44">		this.createUserIfNotExists();</span>
+<span class="fc" id="L45">		this.login();</span>
+<span class="fc" id="L46">	}</span>
+	
+	@AfterEach
+	public void cleanUp() {
+<span class="fc" id="L50">		this.gameWinnerRepository.deleteAll();</span>
+<span class="fc" id="L51">		this.gameRepository.deleteAll();</span>
+<span class="fc" id="L52">		this.playerRepository.deleteAll();</span>
+<span class="fc" id="L53">	}</span>
+	
+	@Test
+	public void testRanking() throws Exception {
+		// Arrange
+<span class="pc" id="L58">		Player loggedPlayer = playerRepository.findByUsername(username).orElseThrow(() -&gt; new DataNotFoundException(&quot;Usuario não encontrado&quot;));</span>
+<span class="fc" id="L59">		PlayerDto opponentDto = new PlayerDto(&quot;opponent&quot;, &quot;pass&quot;, &quot;Opponent&quot;);</span>
+<span class="fc" id="L60">		mockMvc</span>
+<span class="fc" id="L61">			.perform(post(&quot;/api/v1/jokenpo/player/create&quot;)</span>
+<span class="fc" id="L62">					.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L63">					.content(objectMapper.writeValueAsString(opponentDto)))</span>
+<span class="fc" id="L64">			.andExpect(status().isCreated());</span>
+<span class="pc" id="L65">		Player opponent = playerRepository.findByUsername(&quot;opponent&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Usuario oponente não encontrado&quot;));</span>
+		
+<span class="fc" id="L67">		Game game1 = gameRepository.save(new Game());</span>
+<span class="fc" id="L68">		Game game2 = gameRepository.save(new Game());</span>
+<span class="fc" id="L69">		Game game3 = gameRepository.save(new Game());</span>
+		
+<span class="fc" id="L71">		GameWinner gameWinner1 = new GameWinner(new GameWinnerId(game1.getId(), loggedPlayer.getId()), loggedPlayer);</span>
+<span class="fc" id="L72">		GameWinner gameWinner2 = new GameWinner(new GameWinnerId(game2.getId(), opponent.getId()), opponent);</span>
+<span class="fc" id="L73">		GameWinner gameWinner3 = new GameWinner(new GameWinnerId(game3.getId(), loggedPlayer.getId()), loggedPlayer);</span>
+<span class="fc" id="L74">		gameWinnerRepository.save(gameWinner1);</span>
+<span class="fc" id="L75">		gameWinnerRepository.save(gameWinner2);</span>
+<span class="fc" id="L76">		gameWinnerRepository.save(gameWinner3);</span>
+		
+		// Act
+<span class="fc" id="L79">	 	MvcResult result = mockMvc.perform(get(&quot;/api/v1/jokenpo/ranking&quot;)</span>
+<span class="fc" id="L80">						.header(&quot;Authorization&quot;, this.getAuthorization()))</span>
+<span class="fc" id="L81">			.andExpect(status().isOk())</span>
+<span class="fc" id="L82">			.andReturn();</span>
+		
+		// Assert
+<span class="fc" id="L85">		List&lt;RankingDto&gt; rankings = objectMapper.readValue(</span>
+<span class="fc" id="L86">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L87">				new TypeReference&lt;List&lt;RankingDto&gt;&gt;() {});</span>
+<span class="fc" id="L88">		assertEquals(2, rankings.size());</span>
+<span class="fc" id="L89">		assertEquals(new RankingDto(1, new PlayerDto(loggedPlayer), 2L), rankings.get(0));</span>
+<span class="fc" id="L90">		assertEquals(new RankingDto(2, new PlayerDto(opponent), 1L), rankings.get(1));</span>
+<span class="fc" id="L91">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

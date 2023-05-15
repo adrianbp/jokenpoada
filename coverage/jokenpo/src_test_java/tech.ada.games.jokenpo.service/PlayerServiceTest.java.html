@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlayerServiceTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.service</a> &gt; <span class="el_source">PlayerServiceTest.java</span></div><h1>PlayerServiceTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.service;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import tech.ada.games.jokenpo.dto.PlayerDto;
+import tech.ada.games.jokenpo.exception.DataConflictException;
+import tech.ada.games.jokenpo.exception.DataNotFoundException;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.model.Role;
+import tech.ada.games.jokenpo.repository.PlayerMoveRepository;
+import tech.ada.games.jokenpo.repository.PlayerRepository;
+import tech.ada.games.jokenpo.repository.RoleRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+public class PlayerServiceTest {
+
+    @Mock
+    private PlayerRepository playerRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private PlayerMoveRepository playerMoveRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private PlayerService playerService;
+
+<span class="fc" id="L41">    public PlayerServiceTest() {</span>
+<span class="fc" id="L42">        MockitoAnnotations.openMocks(this);</span>
+<span class="fc" id="L43">    }</span>
+
+
+    @Test
+    public void testCreatePlayer() throws DataConflictException {
+
+<span class="fc" id="L49">        PlayerDto playerDto = new PlayerDto(&quot;John&quot;, &quot;john&quot;, &quot;password&quot;);</span>
+
+<span class="fc" id="L51">        when(playerRepository.existsByUsername(anyString())).thenReturn(false);</span>
+<span class="fc" id="L52">        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(new Role()));</span>
+<span class="fc" id="L53">        when(passwordEncoder.encode(anyString())).thenReturn(&quot;encodedPassword&quot;);</span>
+
+
+<span class="fc" id="L56">        playerService.createPlayer(playerDto);</span>
+
+
+<span class="fc" id="L59">        verify(playerRepository, times(1)).save(any(Player.class));</span>
+<span class="fc" id="L60">    }</span>
+
+    @Test
+    public void testCreatePlayerWithExistingUsername() {
+        // Arrange
+<span class="fc" id="L65">        PlayerDto playerDto = new PlayerDto(&quot;John&quot;, &quot;john&quot;, &quot;password&quot;);</span>
+
+<span class="fc" id="L67">        when(playerRepository.existsByUsername(anyString())).thenReturn(true);</span>
+
+        // Act and assert
+<span class="pc" id="L70">        assertThrows(DataConflictException.class, () -&gt; playerService.createPlayer(playerDto));</span>
+<span class="fc" id="L71">        verify(playerRepository, never()).save(any(Player.class));</span>
+<span class="fc" id="L72">    }</span>
+
+    @Test
+    public void testFindPlayers() throws DataNotFoundException {
+
+<span class="fc" id="L77">        when(playerRepository.findAll()).thenReturn(List.of(new Player()));</span>
+
+
+<span class="fc" id="L80">        List&lt;Player&gt; players = playerService.findPlayers();</span>
+
+
+<span class="fc" id="L83">        assertFalse(players.isEmpty());</span>
+<span class="fc" id="L84">    }</span>
+
+    @Test
+    public void testFindPlayersEmpty() {
+
+<span class="fc" id="L89">        when(playerRepository.findAll()).thenReturn(List.of());</span>
+
+
+<span class="pc" id="L92">        assertThrows(DataNotFoundException.class, () -&gt; playerService.findPlayers());</span>
+<span class="fc" id="L93">    }</span>
+
+    @Test
+    public void testFindByPlayer() throws DataNotFoundException {
+
+<span class="fc" id="L98">        Player player = new Player();</span>
+<span class="fc" id="L99">        when(playerRepository.findByUsername(anyString())).thenReturn(Optional.of(player));</span>
+
+
+<span class="fc" id="L102">        Player foundPlayer = playerService.findByPlayer(&quot;john&quot;);</span>
+
+
+<span class="fc" id="L105">        assertNotNull(foundPlayer);</span>
+<span class="fc" id="L106">    }</span>
+
+    @Test
+    public void testFindByNonExistingPlayer() {
+
+<span class="fc" id="L111">        when(playerRepository.findByUsername(anyString())).thenReturn(Optional.empty());</span>
+
+
+<span class="pc" id="L114">        assertThrows(DataNotFoundException.class, () -&gt; playerService.findByPlayer(&quot;john&quot;));</span>
+<span class="fc" id="L115">    }</span>
+
+    @Test
+    public void testDeletePlayer() throws DataNotFoundException, DataConflictException {
+
+<span class="fc" id="L120">        Player player = new Player();</span>
+<span class="fc" id="L121">        player.setId(1L);</span>
+<span class="fc" id="L122">        when(playerRepository.findById(anyLong())).thenReturn(Optional.of(player));</span>
+<span class="fc" id="L123">        when(playerMoveRepository.countByUnfinishedGameAndPlayer(anyLong())).thenReturn(0L);</span>
+
+<span class="fc" id="L125">        playerService.deletePlayer(player.getId());</span>
+
+
+<span class="fc" id="L128">        verify(playerRepository, times(1)).delete(any(Player.class));</span>
+
+<span class="fc" id="L130">    }</span>
+
+    @Test
+    public void testDeleteNonExistingPlayer()  {
+
+<span class="fc" id="L135">        Player player = new Player();</span>
+<span class="fc" id="L136">        player.setId(1L);</span>
+<span class="fc" id="L137">        when(playerRepository.findById(anyLong())).thenReturn(Optional.empty());</span>
+
+
+<span class="pc" id="L140">        assertThrows(DataNotFoundException.class, () -&gt; playerService.deletePlayer(player.getId()));</span>
+
+<span class="fc" id="L142">    }</span>
+
+    @Test
+    public void testDeleteUnfinishedGamePlayer() {
+
+<span class="fc" id="L147">        Player player = new Player();</span>
+<span class="fc" id="L148">        player.setId(1L);</span>
+<span class="fc" id="L149">        when(playerRepository.findById(anyLong())).thenReturn(Optional.of(player));</span>
+<span class="fc" id="L150">        when(playerMoveRepository.countByUnfinishedGameAndPlayer(anyLong())).thenReturn(1L);</span>
+
+
+<span class="pc" id="L153">        assertThrows(DataConflictException.class, () -&gt; playerService.deletePlayer(player.getId()));</span>
+
+<span class="fc" id="L155">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

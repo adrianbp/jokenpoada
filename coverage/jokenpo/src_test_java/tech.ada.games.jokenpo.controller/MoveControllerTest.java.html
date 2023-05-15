@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>MoveControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.controller</a> &gt; <span class="el_source">MoveControllerTest.java</span></div><h1>MoveControllerTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.controller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import tech.ada.games.jokenpo.dto.MoveDto;
+import tech.ada.games.jokenpo.model.Move;
+import tech.ada.games.jokenpo.repository.MoveRepository;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+<span class="fc" id="L29">public class MoveControllerTest extends BaseControllerTest {</span>
+
+	@Autowired
+	private MoveRepository moveRepository;
+	
+	@BeforeEach
+	public void setUp() throws JsonProcessingException, Exception {
+<span class="fc" id="L36">		this.createUserIfNotExists();</span>
+<span class="fc" id="L37">		this.login();</span>
+<span class="fc" id="L38">	}</span>
+	
+	@AfterEach
+	public void cleanUp() {
+<span class="fc" id="L42">		this.moveRepository.deleteAll();</span>
+<span class="fc" id="L43">	}</span>
+	
+	@Test
+	public void testCreateMove() throws Exception {
+		// Arrange
+<span class="fc" id="L48">		MoveDto moveDto = MoveDto.builder().move(&quot;Papel&quot;).build();</span>
+		
+		// Act
+<span class="fc" id="L51">		mockMvc.perform(post(&quot;/api/v1/jokenpo/move&quot;)</span>
+<span class="fc" id="L52">						.header(&quot;Authorization&quot;, this.getAuthorization())</span>
+<span class="fc" id="L53">						.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L54">						.content(objectMapper.writeValueAsString(moveDto)))</span>
+<span class="fc" id="L55">			.andExpect(status().isCreated());</span>
+		
+		// Assert
+<span class="fc" id="L58">		assertTrue(moveRepository.findByMove(&quot;Papel&quot;).isPresent());</span>
+<span class="fc" id="L59">	}</span>
+
+	
+	@Test
+	public void testFindMoves() throws Exception {
+		// Arrange
+<span class="fc" id="L65">		moveRepository.save(Move.builder().move(&quot;Spock&quot;).build());</span>
+<span class="fc" id="L66">		moveRepository.save(Move.builder().move(&quot;Tesoura&quot;).build());</span>
+		
+		// Act
+<span class="fc" id="L69">		MvcResult result = mockMvc.perform(get(&quot;/api/v1/jokenpo/move&quot;)</span>
+<span class="fc" id="L70">						.header(&quot;Authorization&quot;, this.getAuthorization()))</span>
+<span class="fc" id="L71">			.andExpect(status().isOk())</span>
+<span class="fc" id="L72">			.andReturn();</span>
+		
+		// Assert
+<span class="fc" id="L75">		List&lt;Move&gt; moves = objectMapper.readValue(</span>
+<span class="fc" id="L76">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L77">				new TypeReference&lt;List&lt;Move&gt;&gt;() {});</span>
+<span class="fc" id="L78">		assertEquals(2, moves.size());</span>
+<span class="fc" id="L79">		assertTrue(moves.stream().anyMatch(move -&gt; move.getMove().equals(&quot;Spock&quot;)));</span>
+<span class="fc" id="L80">		assertTrue(moves.stream().anyMatch(move -&gt; move.getMove().equals(&quot;Tesoura&quot;)));</span>
+<span class="fc" id="L81">	}</span>
+
+	@Test
+	public void testFindMove() throws Exception {
+		// Arrange
+<span class="fc" id="L86">		moveRepository.save(Move.builder().move(&quot;Spock&quot;).build());</span>
+		
+		// Act
+<span class="fc" id="L89">		MvcResult result = mockMvc.perform(get(&quot;/api/v1/jokenpo/move/Spock&quot;)</span>
+<span class="fc" id="L90">						.header(&quot;Authorization&quot;, this.getAuthorization()))</span>
+<span class="fc" id="L91">			.andExpect(status().isOk())</span>
+<span class="fc" id="L92">			.andReturn();</span>
+		
+		// Assert
+<span class="fc" id="L95">		Move move = objectMapper.readValue(</span>
+<span class="fc" id="L96">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L97">				Move.class);</span>
+<span class="fc" id="L98">		assertEquals(&quot;Spock&quot;, move.getMove());</span>
+<span class="fc" id="L99">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

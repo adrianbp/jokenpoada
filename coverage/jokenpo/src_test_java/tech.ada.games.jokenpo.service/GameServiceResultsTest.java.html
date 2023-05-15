@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>GameServiceResultsTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.service</a> &gt; <span class="el_source">GameServiceResultsTest.java</span></div><h1>GameServiceResultsTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import tech.ada.games.jokenpo.dto.GameMoveDto;
+import tech.ada.games.jokenpo.dto.ResultDto;
+import tech.ada.games.jokenpo.model.Game;
+import tech.ada.games.jokenpo.model.Move;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.model.PlayerMove;
+import tech.ada.games.jokenpo.repository.GameRepository;
+import tech.ada.games.jokenpo.repository.MoveRepository;
+import tech.ada.games.jokenpo.repository.PlayerMoveRepository;
+import tech.ada.games.jokenpo.repository.PlayerRepository;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+<span class="fc" id="L32">public class GameServiceResultsTest {</span>
+
+	@InjectMocks
+	GameService gameService;
+
+	@Mock
+    GameRepository gameRepository;
+
+	@Mock
+    PlayerMoveRepository playerMoveRepository;
+
+	@Mock
+    MoveRepository moveRepository;
+
+	@Mock
+    PlayerRepository playerRepository;
+
+	Player player1;
+	Optional&lt;Player&gt; opPlayer1;
+	Player player2;
+	Optional&lt;Player&gt; opPlayer2;
+	GameMoveDto gameMove;
+	Game game;
+	Optional&lt;Game&gt; opGame;
+	Optional&lt;Move&gt; opMove;
+	PlayerMove playerMove0;
+	Optional&lt;PlayerMove&gt; opPlayerMove;
+	
+	Move move1;
+	PlayerMove playerMove1;
+	List&lt;PlayerMove&gt; playerMoves;
+	
+<span class="fc" id="L64">	String username = null;</span>
+	
+	@BeforeEach
+	void createUser() {
+<span class="fc" id="L68">		player1 = new Player(1L, &quot;user1&quot;, &quot;pass&quot;, &quot;user1&quot;, null);</span>
+<span class="fc" id="L69">		opPlayer1 = Optional.of(player1);</span>
+<span class="fc" id="L70">		player2 = new Player(2L, &quot;user2&quot;, &quot;pass&quot;, &quot;user2&quot;, null);</span>
+<span class="fc" id="L71">		opPlayer2 = Optional.of(player2);</span>
+<span class="fc" id="L72">		gameMove = new GameMoveDto();</span>
+<span class="fc" id="L73">		gameMove.setGameId(1L);</span>
+		
+<span class="fc" id="L75">		game = new Game();</span>
+<span class="fc" id="L76">		game.setId(1L);</span>
+<span class="fc" id="L77">		game.setFinished(false);</span>
+<span class="fc" id="L78">		opGame = Optional.of(game);</span>
+		
+
+<span class="fc" id="L81">	    gameMove.setMoveId(1L);</span>
+<span class="fc" id="L82">	    Move move0 = new Move();</span>
+<span class="fc" id="L83">	    move0.setId(1L);</span>
+<span class="fc" id="L84">	    move0.setMove(&quot;Spock&quot;);</span>
+<span class="fc" id="L85">	    opMove = Optional.of(move0);</span>
+		
+<span class="fc" id="L87">	    playerMove0 = new PlayerMove();</span>
+<span class="fc" id="L88">	    playerMove0.setId(1L);</span>
+<span class="fc" id="L89">	    playerMove0.setGame(game);</span>
+<span class="fc" id="L90">	    playerMove0.setPlayer(player1);</span>
+<span class="fc" id="L91">	    opPlayerMove = Optional.of(playerMove0);</span>
+	    
+<span class="fc" id="L93">	    move1 = new Move();</span>
+<span class="fc" id="L94">	    move1.setId(1L);</span>
+<span class="fc" id="L95">	    move1.setMove(&quot;Spock&quot;);</span>
+<span class="fc" id="L96">	    playerMove1 = new PlayerMove();</span>
+<span class="fc" id="L97">	    playerMove1.setId(1L);</span>
+<span class="fc" id="L98">	    playerMove1.setGame(game);</span>
+<span class="fc" id="L99">	    playerMove1.setPlayer(player1);</span>
+<span class="fc" id="L100">	    playerMove1.setMove(move1);</span>
+	    
+<span class="fc" id="L102">	    playerMoves = Arrays.asList(playerMove1);</span>
+	    
+<span class="fc" id="L104">	    when(playerRepository.findByUsername(username)).thenReturn(opPlayer1);</span>
+<span class="fc" id="L105">		when(gameRepository.findById(gameMove.getGameId())).thenReturn(opGame);</span>
+<span class="fc" id="L106">	    when(moveRepository.findById(gameMove.getMoveId())).thenReturn(opMove);</span>
+<span class="fc" id="L107">	    when(playerMoveRepository.findByUnfinishedGameIdAndPlayer(player1.getId(), gameMove.getGameId())).thenReturn(opPlayerMove);</span>
+<span class="fc" id="L108">	    when(playerMoveRepository.countMovesPlayedByUnfinishedGame(1L)).thenReturn(2L);</span>
+<span class="fc" id="L109">        when(playerMoveRepository.countByUnfinishedGameId(1L)).thenReturn(2L);</span>
+	    
+<span class="fc" id="L111">        when(playerMoveRepository.findByUnfinishedGameId(1L, &quot;Spock&quot;)).thenReturn(playerMoves);</span>
+<span class="fc" id="L112">        when(playerMoveRepository.findByUnfinishedGameId(1L, &quot;Tesoura&quot;)).thenReturn(playerMoves);</span>
+<span class="fc" id="L113">        when(playerMoveRepository.findByUnfinishedGameId(1L, &quot;Papel&quot;)).thenReturn(playerMoves);</span>
+<span class="fc" id="L114">        when(playerMoveRepository.findByUnfinishedGameId(1L, &quot;Pedra&quot;)).thenReturn(playerMoves);</span>
+<span class="fc" id="L115">        when(playerMoveRepository.findByUnfinishedGameId(1L, &quot;Lagarto&quot;)).thenReturn(playerMoves);</span>
+<span class="fc" id="L116">	}</span>
+	
+	
+	@Test
+	void insertPlayerMoveResultSpockTesouraTest() {
+
+<span class="fc" id="L122">	    move1.setMove(&quot;Spock&quot;);</span>
+        
+<span class="fc" id="L124">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L125">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L126">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L127">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L128">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L131">	    ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L133">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L134">	    }</span>
+<span class="nc" id="L135">	    catch (Exception e) {</span>
+<span class="nc" id="L136">	    	e.printStackTrace();</span>
+<span class="nc" id="L137">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L139">	    System.out.println(resultado);</span>
+<span class="fc" id="L140">	    assertEquals(&quot;Spock&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L142">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultSpockPapelTest() {
+
+<span class="fc" id="L147">	    move1.setMove(&quot;Spock&quot;);</span>
+        
+<span class="fc" id="L149">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L150">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L151">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L152">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L153">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L156">	    ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L158">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L159">	    }</span>
+<span class="nc" id="L160">	    catch (Exception e) {</span>
+<span class="nc" id="L161">	    	e.printStackTrace();</span>
+<span class="nc" id="L162">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L164">	    System.out.println(resultado);</span>
+<span class="fc" id="L165">	    assertEquals(&quot;Papel&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L167">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultSpockPedraTest() {
+
+<span class="fc" id="L172">	    move1.setMove(&quot;Spock&quot;);</span>
+        
+<span class="fc" id="L174">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L175">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L176">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L177">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L178">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L181">	    ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L183">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L184">	    }</span>
+<span class="nc" id="L185">	    catch (Exception e) {</span>
+<span class="nc" id="L186">	    	e.printStackTrace();</span>
+<span class="nc" id="L187">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L189">	    System.out.println(resultado);</span>
+<span class="fc" id="L190">	    assertEquals(&quot;Spock&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L192">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultSpockLagartoTest() {
+
+<span class="fc" id="L197">	    move1.setMove(&quot;Spock&quot;);</span>
+        
+<span class="fc" id="L199">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L200">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L201">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L202">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L203">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+	    
+        
+<span class="fc" id="L206">	    ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L208">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L209">	    }</span>
+<span class="nc" id="L210">	    catch (Exception e) {</span>
+<span class="nc" id="L211">	    	e.printStackTrace();</span>
+<span class="nc" id="L212">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L214">	    System.out.println(resultado);</span>
+<span class="fc" id="L215">	    assertEquals(&quot;Lagarto&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L217">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultTesouraPapelTest() {
+
+<span class="fc" id="L222">	    move1.setMove(&quot;Tesoura&quot;);</span>
+
+<span class="fc" id="L224">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L225">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L226">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L227">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L228">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L231">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L233">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L234">	    }</span>
+<span class="nc" id="L235">	    catch (Exception e) {</span>
+<span class="nc" id="L236">	    	e.printStackTrace();</span>
+<span class="nc" id="L237">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L239">	    System.out.println(resultado);</span>
+<span class="fc" id="L240">	    assertEquals(&quot;Tesoura&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L242">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultTesouraPedraTest() {
+
+<span class="fc" id="L247">	    move1.setMove(&quot;Tesoura&quot;);</span>
+
+<span class="fc" id="L249">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L250">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L251">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L252">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L253">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L256">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L258">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L259">	    }</span>
+<span class="nc" id="L260">	    catch (Exception e) {</span>
+<span class="nc" id="L261">	    	e.printStackTrace();</span>
+<span class="nc" id="L262">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L264">	    System.out.println(resultado);</span>
+<span class="fc" id="L265">	    assertEquals(&quot;Pedra&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L267">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultTesouraLagartoTest() {
+
+<span class="fc" id="L272">	    move1.setMove(&quot;Tesoura&quot;);</span>
+
+<span class="fc" id="L274">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L275">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L276">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L277">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L278">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+	    
+        
+<span class="fc" id="L281">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L283">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L284">	    }</span>
+<span class="nc" id="L285">	    catch (Exception e) {</span>
+<span class="nc" id="L286">	    	e.printStackTrace();</span>
+<span class="nc" id="L287">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L289">	    System.out.println(resultado);</span>
+<span class="fc" id="L290">	    assertEquals(&quot;Tesoura&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L292">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultPapelPedraTest() {
+
+<span class="fc" id="L297">	    move1.setMove(&quot;Papel&quot;);</span>
+
+<span class="fc" id="L299">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L300">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L301">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L302">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L303">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+	    
+        
+<span class="fc" id="L306">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L308">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L309">	    }</span>
+<span class="nc" id="L310">	    catch (Exception e) {</span>
+<span class="nc" id="L311">	    	e.printStackTrace();</span>
+<span class="nc" id="L312">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L314">	    System.out.println(resultado);</span>
+<span class="fc" id="L315">	    assertEquals(&quot;Papel&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L317">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultPapelLagartoTest() {
+
+<span class="fc" id="L322">	    move1.setMove(&quot;Papel&quot;);</span>
+
+<span class="fc" id="L324">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L325">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L326">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L327">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L328">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+	    
+        
+<span class="fc" id="L331">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L333">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L334">	    }</span>
+<span class="nc" id="L335">	    catch (Exception e) {</span>
+<span class="nc" id="L336">	    	e.printStackTrace();</span>
+<span class="nc" id="L337">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L339">	    System.out.println(resultado);</span>
+<span class="fc" id="L340">	    assertEquals(&quot;Lagarto&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L342">	}</span>
+	
+	@Test
+	void insertPlayerMoveResultPedraLagartoTest() {
+
+<span class="fc" id="L347">	    move1.setMove(&quot;Pedra&quot;);</span>
+
+<span class="fc" id="L349">        when(playerMoveRepository.existsSpockByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L350">        when(playerMoveRepository.existsTesouraByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L351">        when(playerMoveRepository.existsPapelByUnfinishedGameId(1L)).thenReturn(Boolean.FALSE);</span>
+<span class="fc" id="L352">        when(playerMoveRepository.existsPedraByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+<span class="fc" id="L353">        when(playerMoveRepository.existsLagartoByUnfinishedGameId(1L)).thenReturn(Boolean.TRUE);</span>
+	    
+        
+<span class="fc" id="L356">        ResultDto resultado = null;</span>
+	    try {
+<span class="fc" id="L358">	    	resultado = gameService.insertPlayerMove(gameMove);</span>
+<span class="fc" id="L359">	    }</span>
+<span class="nc" id="L360">	    catch (Exception e) {</span>
+<span class="nc" id="L361">	    	e.printStackTrace();</span>
+<span class="nc" id="L362">	    	throw new RuntimeException(e);</span>
+	    }
+<span class="fc" id="L364">	    System.out.println(resultado);</span>
+<span class="fc" id="L365">	    assertEquals(&quot;Pedra&quot;, resultado.getOriginalResult());</span>
+	    
+<span class="fc" id="L367">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

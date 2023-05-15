@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>GameControllerTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.controller</a> &gt; <span class="el_source">GameControllerTest.java</span></div><h1>GameControllerTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.controller;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import tech.ada.games.jokenpo.dto.GameDto;
+import tech.ada.games.jokenpo.dto.GameMoveDto;
+import tech.ada.games.jokenpo.dto.PlayerDto;
+import tech.ada.games.jokenpo.dto.ResultDto;
+import tech.ada.games.jokenpo.exception.DataNotFoundException;
+import tech.ada.games.jokenpo.model.Game;
+import tech.ada.games.jokenpo.model.Move;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.model.Role;
+import tech.ada.games.jokenpo.repository.GameRepository;
+import tech.ada.games.jokenpo.repository.MoveRepository;
+import tech.ada.games.jokenpo.repository.PlayerMoveRepository;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestMethodOrder(OrderAnnotation.class)
+@TestInstance(Lifecycle.PER_CLASS)
+<span class="fc" id="L49">public class GameControllerTest extends BaseControllerTest {</span>
+
+
+	@Autowired
+	private GameRepository gameRepository;
+
+	@Autowired
+	private MoveRepository moveRepository;
+
+	@Autowired
+	private PlayerMoveRepository playerMoveRepository;
+	
+	PlayerDto p1;
+	Player player1;
+	PlayerDto p2;
+	Player player2;
+	
+	Game gameCriado;
+	
+    Move moveSpock;
+    Move moveTesoura;
+    Move movePapel;
+    Move movePedra;
+    Move moveLagarto;
+	
+	@BeforeAll
+	public void setUp() throws JsonProcessingException, Exception {
+<span class="fc" id="L76">		this.createUserIfNotExists();</span>
+<span class="fc" id="L77">		this.login();</span>
+<span class="fc" id="L78">		System.out.println(this.token);</span>
+
+<span class="fc" id="L80">        Role role1 = new Role();</span>
+<span class="fc" id="L81">        role1.setId(1L);</span>
+<span class="fc" id="L82">        role1.setName(&quot;acess_1&quot;);</span>
+<span class="fc" id="L83">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L84">        roles.add(role1);</span>
+
+<span class="fc" id="L86">        p1 = new PlayerDto(&quot;John1&quot;, &quot;12232&quot;, &quot;John&quot;);</span>
+<span class="fc" id="L87">        p2 = new PlayerDto(&quot;Jane1&quot;, &quot;12232&quot;, &quot;Jane&quot;);</span>
+
+<span class="fc" id="L89">        createUserIfNotExists(p1);</span>
+<span class="fc" id="L90">        player1 = getPlayer(p1.getUsername());</span>
+<span class="fc" id="L91">        System.out.println(&quot;P1: &quot; + player1);</span>
+<span class="fc" id="L92">        createUserIfNotExists(p2);</span>
+<span class="fc" id="L93">        player2 = getPlayer(p2.getUsername());</span>
+<span class="fc" id="L94">        System.out.println(player2);</span>
+
+<span class="fc" id="L96">        moveRepository.save(new Move(null, &quot;Spock&quot;, null));</span>
+<span class="fc" id="L97">        moveRepository.save(new Move(null, &quot;Tesoura&quot;, null));</span>
+<span class="fc" id="L98">        moveRepository.save(new Move(null, &quot;Papel&quot;, null));</span>
+<span class="fc" id="L99">        moveRepository.save(new Move(null, &quot;Pedra&quot;, null));</span>
+<span class="fc" id="L100">        moveRepository.save(new Move(null, &quot;Lagarto&quot;, null));</span>
+        
+<span class="pc" id="L102">        moveSpock = moveRepository.findByMove(&quot;Spock&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Move Spock not found&quot;));</span>
+<span class="pc" id="L103">        moveTesoura = moveRepository.findByMove(&quot;Tesoura&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Move Tesoura not found&quot;));</span>
+<span class="pc" id="L104">        movePapel = moveRepository.findByMove(&quot;Papel&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Move Papel not found&quot;));</span>
+<span class="pc" id="L105">        movePedra = moveRepository.findByMove(&quot;Pedra&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Move Pedra not found&quot;));</span>
+<span class="pc" id="L106">        moveLagarto = moveRepository.findByMove(&quot;Lagarto&quot;).orElseThrow(() -&gt; new DataNotFoundException(&quot;Move Lagarto not found&quot;));</span>
+        
+<span class="fc" id="L108">	}</span>
+	
+	@AfterAll
+	public void cleanUp() {
+<span class="fc" id="L112">		playerMoveRepository.deleteAllInBatch();</span>
+<span class="fc" id="L113">		gameRepository.deleteAllInBatch();</span>
+<span class="fc" id="L114">		moveRepository.deleteAllInBatch();</span>
+<span class="fc" id="L115">		playerRepository.deleteAllInBatch();</span>
+<span class="fc" id="L116">	}</span>
+	
+	@Test
+	@Order(1)
+	public void testNewGame() throws Exception {
+		
+		// Arrange
+<span class="fc" id="L123">		List&lt;Long&gt; players = Arrays.asList(player1.getId(), player2.getId());</span>
+<span class="fc" id="L124">		GameDto gameDto = new GameDto(players);</span>
+		
+<span class="fc" id="L126">		LocalDateTime inicio = LocalDateTime.now();</span>
+		
+		// Act
+<span class="fc" id="L129">		mockMvc.perform(post(&quot;/api/v1/jokenpo/game/new&quot;)</span>
+<span class="fc" id="L130">						.header(&quot;Authorization&quot;, this.getAuthorization())</span>
+<span class="fc" id="L131">						.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L132">						.content(objectMapper.writeValueAsString(gameDto)))</span>
+<span class="fc" id="L133">			.andExpect(status().isCreated());</span>
+		
+		
+<span class="fc" id="L136">		MvcResult result = mockMvc.perform(get(&quot;/api/v1/jokenpo/game&quot;)</span>
+<span class="fc" id="L137">				.header(&quot;Authorization&quot;, this.getAuthorization()))</span>
+<span class="fc" id="L138">						.andExpect(status().isOk())</span>
+<span class="fc" id="L139">						.andReturn();</span>
+
+		// Assert
+<span class="fc" id="L142">		List&lt;Game&gt; games = objectMapper.readValue(</span>
+<span class="fc" id="L143">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L144">				new TypeReference&lt;List&lt;Game&gt;&gt;() {});</span>
+		
+<span class="fc" id="L146">		System.out.println(games);</span>
+<span class="pc bpc" id="L147" title="2 of 4 branches missed.">		Optional&lt;Game&gt; op = games.stream().filter(g -&gt; g.getCreatedAt().isAfter(inicio) &amp;&amp; g.getCreator().getUsername().equals(this.username)).findFirst();</span>
+<span class="fc" id="L148">		System.out.println(op.get());</span>
+<span class="fc" id="L149">		assertTrue(op.isPresent());</span>
+<span class="fc" id="L150">		gameCriado = op.get();</span>
+<span class="fc" id="L151">	}</span>
+
+	
+	@Test
+	@Order(2)
+	public void testInsertPlayer1Move() throws Exception {
+		
+<span class="fc" id="L158">		String token = this.login(p1.getUsername(), p1.getPassword());</span>
+		
+<span class="fc" id="L160">		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), moveSpock.getId());</span>
+		// Act
+<span class="fc" id="L162">		MvcResult result = mockMvc.perform(post(&quot;/api/v1/jokenpo/game/move&quot;)</span>
+<span class="fc" id="L163">						.header(&quot;Authorization&quot;, &quot;Bearer &quot; + token)</span>
+<span class="fc" id="L164">						.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L165">						.content(objectMapper.writeValueAsString(gameMoveDto)))</span>
+<span class="fc" id="L166">			.andExpect(status().isOk()).andReturn();</span>
+		
+<span class="fc" id="L168">		ResultDto resultDto = objectMapper.readValue(</span>
+<span class="fc" id="L169">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L170">				new TypeReference&lt;ResultDto&gt;() {});</span>
+<span class="fc" id="L171">		System.out.println(resultDto);</span>
+<span class="fc" id="L172">	}</span>
+
+	
+	@Test
+	@Order(3)
+	public void testInsertPlayer2Move() throws Exception {
+		
+<span class="fc" id="L179">		String token = this.login(p2.getUsername(), p2.getPassword());</span>
+		
+<span class="fc" id="L181">		GameMoveDto gameMoveDto = new GameMoveDto(gameCriado.getId(), moveTesoura.getId());</span>
+		// Act
+<span class="fc" id="L183">		MvcResult result = mockMvc.perform(post(&quot;/api/v1/jokenpo/game/move&quot;)</span>
+<span class="fc" id="L184">						.header(&quot;Authorization&quot;, &quot;Bearer &quot; + token)</span>
+<span class="fc" id="L185">						.contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L186">						.content(objectMapper.writeValueAsString(gameMoveDto)))</span>
+<span class="fc" id="L187">			.andExpect(status().isOk()).andReturn();</span>
+		
+<span class="fc" id="L189">		ResultDto resultDto = objectMapper.readValue(</span>
+<span class="fc" id="L190">				result.getResponse().getContentAsString(),</span>
+<span class="fc" id="L191">				new TypeReference&lt;ResultDto&gt;() {});</span>
+<span class="fc" id="L192">		System.out.println(resultDto);</span>
+<span class="fc" id="L193">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

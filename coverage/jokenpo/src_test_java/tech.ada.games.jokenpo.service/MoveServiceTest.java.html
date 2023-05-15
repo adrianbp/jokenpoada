@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>MoveServiceTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.service</a> &gt; <span class="el_source">MoveServiceTest.java</span></div><h1>MoveServiceTest.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+
+import tech.ada.games.jokenpo.dto.MoveDto;
+import tech.ada.games.jokenpo.exception.BadRequestException;
+import tech.ada.games.jokenpo.exception.DataConflictException;
+import tech.ada.games.jokenpo.exception.DataNotFoundException;
+import tech.ada.games.jokenpo.model.Move;
+import tech.ada.games.jokenpo.repository.MoveRepository;
+
+<span class="fc" id="L24">public class MoveServiceTest {</span>
+<span class="fc" id="L25">	private MoveRepository moveRepository = mock(MoveRepository.class);</span>
+<span class="fc" id="L26">	private MoveService moveService = new MoveService(moveRepository);</span>
+	
+<span class="fc" id="L28">	private ArgumentCaptor&lt;Move&gt; moveCaptor = ArgumentCaptor.forClass(Move.class);</span>
+	
+	@Test
+	public void testCreateMoveAlreadyExists() throws DataConflictException, BadRequestException {
+		// Arrange
+<span class="fc" id="L33">		String moveStr = &quot;Jogada&quot;;</span>
+<span class="fc" id="L34">		MoveDto moveDto = new MoveDto(moveStr);</span>
+		
+<span class="fc" id="L36">		when(moveRepository.existsByMove(moveStr)).thenReturn(true);</span>
+		
+		// Act
+<span class="pc" id="L39">		DataConflictException ex = assertThrows(DataConflictException.class, () -&gt; moveService.createMove(moveDto));</span>
+		
+		// Assert
+<span class="fc" id="L42">		assertEquals(&quot;A jogada já está cadastrada!&quot;, ex.getMessage());</span>
+<span class="fc" id="L43">	}</span>
+	
+	@ParameterizedTest
+	@ValueSource(strings = {
+			&quot;Spock&quot;,
+			&quot;Tesoura&quot;,
+			&quot;Papel&quot;,
+			&quot;Pedra&quot;,
+			&quot;Lagarto&quot;,
+			&quot;Jogada Spock&quot;,
+			&quot;Jogada Tesoura&quot;,
+			&quot;Jogada Papel&quot;,
+			&quot;Jogada Pedra&quot;,
+			&quot;Jogada Lagarto&quot;,
+			&quot;SPOCK&quot;,
+			&quot;tesoura&quot;,
+			&quot;PaPeL&quot;,
+			&quot;pEdRa&quot;,
+			&quot;LAGarto&quot;,
+			&quot;JOGADA SPOCK&quot;,
+			&quot;jogada tesoura&quot;,
+			&quot;JoGaDa PaPeL&quot;,
+			&quot;jOgAdA pEdRa&quot;,
+			&quot;JOGada LAGArto&quot;
+	})
+	public void testCreateMoveValid(String moveStr) throws DataConflictException, BadRequestException {
+		// Arrange
+<span class="fc" id="L70">		MoveDto moveDto = new MoveDto(moveStr);</span>
+		
+<span class="fc" id="L72">		when(moveRepository.existsByMove(moveStr)).thenReturn(false);</span>
+		
+		// Act
+<span class="fc" id="L75">		moveService.createMove(moveDto);</span>
+		
+		// Assert
+<span class="fc" id="L78">		verify(moveRepository).save(moveCaptor.capture());</span>
+<span class="fc" id="L79">		assertEquals(moveStr, moveCaptor.getValue().getMove());</span>
+<span class="fc" id="L80">	}</span>
+	
+	@Test
+	public void testCreateMoveInvalid() throws DataConflictException, BadRequestException {
+		// Arrange
+<span class="fc" id="L85">		String moveStr = &quot;Jogada&quot;;</span>
+<span class="fc" id="L86">		MoveDto moveDto = new MoveDto(moveStr);</span>
+		
+<span class="fc" id="L88">		when(moveRepository.existsByMove(moveStr)).thenReturn(false);</span>
+		
+		// Act
+<span class="pc" id="L91">		BadRequestException ex = assertThrows(BadRequestException.class, () -&gt; moveService.createMove(moveDto));</span>
+		
+		// Assert
+<span class="fc" id="L94">		assertEquals(&quot;Você pode cadastrar apenas os movimentos Spock, Tesoura, Papel, Pedra e Lagarto&quot;, ex.getMessage());</span>
+<span class="fc" id="L95">	}</span>
+	
+	@Test
+	public void testFindMoves() throws DataNotFoundException {
+		// Arrange
+<span class="fc" id="L100">		List&lt;Move&gt; moves = List.of(new Move());</span>
+<span class="fc" id="L101">		when(moveRepository.findAll()).thenReturn(moves);</span>
+		
+		// Act
+<span class="fc" id="L104">		List&lt;Move&gt; actualMoves = moveService.findMoves();</span>
+		
+		// Assert
+<span class="fc" id="L107">		assertEquals(moves, actualMoves);</span>
+<span class="fc" id="L108">	}</span>
+
+	@Test
+	public void testFindMovesEmpty() throws DataNotFoundException {
+		// Arrange
+<span class="fc" id="L113">		when(moveRepository.findAll()).thenReturn(List.of());</span>
+		
+		// Act
+<span class="pc" id="L116">		DataNotFoundException ex = assertThrows(DataNotFoundException.class, () -&gt; moveService.findMoves());</span>
+		
+		// Assert
+<span class="fc" id="L119">		assertEquals(&quot;Não há jogadas cadastradas!&quot;, ex.getMessage());</span>
+<span class="fc" id="L120">	}</span>
+
+	@Test
+	public void testFindByMove() throws DataNotFoundException {
+		// Arrange
+<span class="fc" id="L125">		String moveStr = &quot;Jogada&quot;;</span>
+<span class="fc" id="L126">		Move move = new Move();</span>
+<span class="fc" id="L127">		move.setMove(moveStr);</span>
+		
+<span class="fc" id="L129">		when(moveRepository.findByMove(moveStr)).thenReturn(Optional.of(move));</span>
+		
+		// Act
+<span class="fc" id="L132">		Move actualMove = moveService.findByMove(moveStr);</span>
+		
+		// Assert
+<span class="fc" id="L135">		assertEquals(move, actualMove);</span>
+<span class="fc" id="L136">	}</span>
+
+	@Test
+	public void testFindByMoveEmpty() throws DataNotFoundException {
+		// Arrange
+<span class="fc" id="L141">		String moveStr = &quot;Jogada&quot;;</span>
+<span class="fc" id="L142">		when(moveRepository.findByMove(moveStr)).thenReturn(Optional.empty());</span>
+		
+		// Act
+<span class="pc" id="L145">		DataNotFoundException ex = assertThrows(DataNotFoundException.class, () -&gt; moveService.findByMove(moveStr));</span>
+		
+		// Assert
+<span class="fc" id="L148">		assertEquals(&quot;A jogada não está cadastrada!&quot;, ex.getMessage());</span>
+<span class="fc" id="L149">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

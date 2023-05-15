@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>RankingSteps.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.acceptance.steps</a> &gt; <span class="el_source">RankingSteps.java</span></div><h1>RankingSteps.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.acceptance.steps;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
+import tech.ada.games.jokenpo.dto.PlayerDto;
+import tech.ada.games.jokenpo.dto.RankingDto;
+import tech.ada.games.jokenpo.model.GameWinner;
+import tech.ada.games.jokenpo.model.GameWinnerId;
+import tech.ada.games.jokenpo.model.Player;
+import tech.ada.games.jokenpo.repository.GameWinnerRepository;
+import tech.ada.games.jokenpo.service.RankingService;
+
+public class RankingSteps {
+<span class="fc" id="L23">	private GameWinnerRepository gameWinnerRepository = mock(GameWinnerRepository.class);</span>
+	private RankingService rankingService;
+
+<span class="fc" id="L26">	private Player player1 = Player.builder().id(1l).username(&quot;player1&quot;).build();</span>
+<span class="fc" id="L27">	private Player player2 = Player.builder().id(2l).username(&quot;player2&quot;).build();</span>
+<span class="fc" id="L28">	private Player player3 = Player.builder().id(3l).username(&quot;player3&quot;).build();</span>
+<span class="fc" id="L29">	private Player player4 = Player.builder().id(4l).username(&quot;player4&quot;).build();</span>
+<span class="fc" id="L30">	private Player player5 = Player.builder().id(5l).username(&quot;player5&quot;).build();</span>
+	private List&lt;RankingDto&gt; genericRanking;
+	
+<span class="fc" id="L33">	public RankingSteps() {</span>
+<span class="fc" id="L34">		rankingService = new RankingService(gameWinnerRepository);</span>
+<span class="fc" id="L35">	}</span>
+	
+    @Dado(&quot;um usuario qualquer&quot;)
+    public void dado_usuario_qualquer() {
+<span class="fc" id="L39">		when(gameWinnerRepository.findAll()).thenReturn(List.of(</span>
+<span class="fc" id="L40">				new GameWinner(new GameWinnerId(1L, player1.getId()), player1),</span>
+<span class="fc" id="L41">				new GameWinner(new GameWinnerId(2L, player1.getId()), player1),</span>
+<span class="fc" id="L42">				new GameWinner(new GameWinnerId(3L, player3.getId()), player3),</span>
+<span class="fc" id="L43">				new GameWinner(new GameWinnerId(4L, player2.getId()), player2),</span>
+<span class="fc" id="L44">				new GameWinner(new GameWinnerId(5L, player4.getId()), player4),</span>
+<span class="fc" id="L45">				new GameWinner(new GameWinnerId(5L, player1.getId()), player1),</span>
+<span class="fc" id="L46">				new GameWinner(new GameWinnerId(6L, player2.getId()), player2),</span>
+<span class="fc" id="L47">				new GameWinner(new GameWinnerId(7L, player5.getId()), player5),</span>
+<span class="fc" id="L48">				new GameWinner(new GameWinnerId(7L, player2.getId()), player2),</span>
+<span class="fc" id="L49">				new GameWinner(new GameWinnerId(8L, player1.getId()), player1)));</span>
+<span class="fc" id="L50">    }</span>
+
+    @Quando(&quot;busca o ranking dos jogadores&quot;)
+    public void busca_o_ranking_dos_jogadores() {
+<span class="fc" id="L54">    	genericRanking = rankingService.getRanking();</span>
+<span class="fc" id="L55">    }</span>
+    
+    @Entao(&quot;recebe uma lista&quot;)
+    public void recebe_uma_lista() {
+<span class="fc" id="L59">		assertEquals(5, genericRanking.size());</span>
+<span class="fc" id="L60">		assertEquals(new RankingDto(1, new PlayerDto(player1), 4L), genericRanking.get(0));</span>
+<span class="fc" id="L61">		assertEquals(new RankingDto(2, new PlayerDto(player2), 3L), genericRanking.get(1));</span>
+<span class="fc" id="L62">		assertEquals(new RankingDto(3, new PlayerDto(player3), 1L), genericRanking.get(2));</span>
+<span class="fc" id="L63">		assertEquals(new RankingDto(4, new PlayerDto(player4), 1L), genericRanking.get(3));</span>
+<span class="fc" id="L64">		assertEquals(new RankingDto(5, new PlayerDto(player5), 1L), genericRanking.get(4));</span>
+<span class="fc" id="L65">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>

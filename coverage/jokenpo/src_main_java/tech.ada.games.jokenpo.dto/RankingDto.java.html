@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>RankingDto.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">jokenpo (May 15, 2023 7:17:13 PM)</a> &gt; <a href="../../index.html" class="el_group">jokenpo</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">tech.ada.games.jokenpo.dto</a> &gt; <span class="el_source">RankingDto.java</span></div><h1>RankingDto.java</h1><pre class="source lang-java linenums">package tech.ada.games.jokenpo.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+<span class="fc" id="L11">@Getter</span>
+<span class="fc" id="L12">@Setter</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
+<span class="fc" id="L14">@NoArgsConstructor</span>
+<span class="pc" id="L15">@Builder</span>
+<span class="nc" id="L16">@ToString</span>
+<span class="pc bpc" id="L17" title="21 of 30 branches missed.">@EqualsAndHashCode</span>
+public class RankingDto implements Comparable&lt;RankingDto&gt; {
+
+	private Integer position;
+	private PlayerDto player;
+	private Long points;
+	
+	@Override
+	public int compareTo(RankingDto o) {
+<span class="fc" id="L26">		int comparePoints = o.getPoints().compareTo(this.points);</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">		if (comparePoints != 0) {</span>
+<span class="fc" id="L28">			return comparePoints;</span>
+		}
+<span class="fc" id="L30">		return this.getPlayer().getUsername().compareTo(o.getPlayer().getUsername());</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>jokenpo (May 15, 2023 7:17:13 PM)</div></body></html>
