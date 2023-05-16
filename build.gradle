@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.0.6'
 	id 'io.spring.dependency-management' version '1.1.0'
+	id "org.sonarqube" version "3.5.0.2730"
 }
 
 group = 'tech.ada.games'
@@ -51,5 +52,13 @@ tasks.named('test') {
 configurations {
 	cucumberRuntime {
 		extendsFrom testImplementation
+	}
+}
+
+sonarqube {
+	properties {
+		property "sonar.projectKey", "adrianbp_jokenpoada"
+		property "sonar.organization", "adrianbp"
+		property "sonar.host.url", "https://sonarcloud.io"
 	}
 }
